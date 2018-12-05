@@ -1,0 +1,44 @@
+{
+  "ban": {
+    "example":"!<ban|b> <@user> [reason]",
+    "desc":"Allows a user with correct privileges to ban a user from the server.",
+    "perms":"BAN_MEMBERS"
+  },
+  "kick": {
+    "example":"!<kick|k> <@user> [reason]",
+    "desc":"Allows a user with correct privileges to kick a user from the server.",
+    "perms":"KICK_MEMBERS"
+  },
+  "ping": {
+    "example":"!ping",
+    "desc":"A ping measures the time it takes a packet to reach its destination and often referred to in-game as latency. A high ping causes lag.",
+    "perms":"SEND_MESSAGES"
+  },
+  "purge": {
+    "example":"!purge <2-100>",
+    "desc":"Allows a user with correct privileges to delete the last two to one hundred messages.",
+    "perms":"MANAGE_MESSAGES"
+  },
+  "say": {
+    "example":"!say <message>",
+    "desc":"Allows a user with correct privileges to send a message as the bot. If bot has correct permissions, it will delete evidence of the command being sent.",
+    "perms":"MANAGE_MESSAGES"
+  },
+  "set": {
+    "example":"!set <option> [argument1] [argument2]",
+    "desc":"Allows Administrator flagged users to set certain options.",
+    "perms":"ADMINISTRATOR",
+    "options": {
+      "antispam": {
+        "example":"!set antispam [number in minutes]",
+        "desc":"Sets the time in minutes between times the auto responder will answer for each response. If no time is given. Will display current setting.",
+        "perms":"ADMINISTRATOR"
+      }
+    }
+  },
+  "version": {
+    "example":"!version",
+    "desc":"Sends a message to the current channel displaying the current bot version.",
+    "perms":"SEND_MESSAGES"
+  }
+}
