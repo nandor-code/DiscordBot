@@ -82,76 +82,7 @@ client.on("message", async message => {
       message.delete().catch(O_o=>{}); 
       message.channel.send(sayMessage);
     }
-   
-    // Kick a user from server
-    if(command === "kick" || command === "k") {
-      if(!perms.has("KICK_MEMBERS") || debugMode &&  message.author.id !== bypassId)
-        return message.reply("Sorry, you don't have permissions to use this!");
-      
-      let member = message.mentions.members.first() || message.guild.members.get(args[0]);
-      if(!member)
-        return message.reply("Please mention a valid member of this server");
-      if(!member.kickable) 
-        return message.reply("I cannot kick this user! Do they have a higher role? Do I have kick permissions?");
-      
-      let reason = args.slice(1).join(' ');
-      if(!reason) reason = "No reason provided";
-      
-      await member.kick(reason)
-        .catch(error => message.reply(`Sorry ${message.author} I couldn't kick because of : ${error}`));
-      message.reply(`${member.user.tag} has been kicked by ${message.author.tag} because: ${reason}`);
 
-    }
-  
-    // Ban a user from server
-    if(command === "ban" || command === "b") {
-      if(!perms.has("BAN_MEMBERS") || debugMode &&  message.author.id !== bypassId)
-        return message.reply("Sorry, you don't have permissions to use this!");
-    
-      let member = message.mentions.members.first();
-      if(!member)
-        return message.reply("Please mention a valid member of this server");
-      if(!member.bannable) 
-        return message.reply("I cannot ban this user! Do they have a higher role? Do I have ban permissions?");
-
-      let reason = args.slice(1).join(' ');
-      if(!reason) reason = "No reason provided";
-    
-      await member.ban(reason)
-        .catch(error => message.reply(`Sorry ${message.author} I couldn't ban because of : ${error}`));
-      message.reply(`${member.user.tag} has been banned by ${message.author.tag} because: ${reason}`);
-    }
-
-    // Delete some number of previous lines in channel  
-    if(command === "purge") {
-      if(!perms.has("MANAGE_MESSAGES") || debugMode &&  message.author.id !== bypassId)
-        return message.reply("Sorry, you don't have permissions to use this!");
-
-      const deleteCount = parseInt(args[0], 10);
-     
-      if(!deleteCount || deleteCount < 2 || deleteCount > 100)
-        return message.reply("Please provide a number between 2 and 100 for the number of messages to delete");
-
-      const fetched = await message.channel.fetchMessages({limit: deleteCount});
-      message.channel.bulkDelete(fetched)
-        .catch(error => message.reply(`Couldn't delete messages because of: ${error}`));
-    }
-    if(command === "set") {
-      if(!perms.has("ADMINISTRATOR") || debugMode &&  message.author.id !== bypassId)
-        return message.reply("Sorry, you don't have permissions to use this!");
-      
-      if(args[0] != undefined) {
-        if (args[0] === 'antispam') {
-          if (args[1] != undefined && isNumeric(args[1])) {
-            spamTimeout = args[1] * 60000;
-            logIt("Anti-Spam timeout set to " + spamTimeout + " milliseconds.");
-            message.reply("I have reset the anti-spam timeout to " + spamTimeout/60000 + " minutes.");
-          } else {
-            message.reply("The anti-spam timeout is " + spamTimeout/60000 + " minutes.");
-          }
-        }
-      }
-    }
   } else {
     // Auto-Reponse Text We're Listening For
     // ETA on compiles
