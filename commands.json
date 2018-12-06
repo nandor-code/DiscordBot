@@ -1,4 +1,10 @@
 {
+  "help": {
+    "example":"!<ban|b> <@user> [reason]",
+    "desc":"Get Help on a Bot Functions or a specific command.",
+    "perms":"SEND_MESSAGES",
+    "func":"help( args, message )"
+  },
   "ban": {
     "example":"!<ban|b> <@user> [reason]",
     "desc":"Allows a user with correct privileges to ban a user from the server.",

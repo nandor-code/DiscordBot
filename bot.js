@@ -1,14 +1,15 @@
+// include helpers
+include( 'bot_helpers.js' );
+include( 'commands.js' );
+
 // Load config file
 const config = require("../config/config.json");
 
 // Import HTTP libs
 const http = require('http');
 
-// Load commands file for help system
-const cmdList = require("../config/commands.json");
-
 // Debug Mode - gives me access by user id to certain commands while on
-const debugMode = false;
+const debugMode = config.debugMode;
 
 // Developer ID - Set this to bypass all permissions checks for this user id. Set it 
 // to letters (something it could never be) when not in use
@@ -59,12 +60,9 @@ client.on("message", async message => {
     const command = args.shift().toLowerCase();
   
     // Help Menu
-    if(command === "help") {
-      if (args.length == 0) {
-        generalHelp(message);
-      } else {
-        getHelp(args, message, perms);
-      }
+    if(command === "help")
+    {
+        //call cmdList.help.func();
     }
 
     // Display our version. For development purposes
@@ -88,165 +86,31 @@ client.on("message", async message => {
       message.channel.send(sayMessage);
     }
 
-  } else {
-    // Auto-Reponse Text We're Listening For
-    // ETA on compiles
-  try {
-    if(!lastResponse.contains("eta") && message.content.toLowerCase().includes("eta") && message.content.toLowerCase().includes("compile")) {
-      message.reply(`The ETA for a compile is generally before or at 8PM EST for minor patches. For larger updates this time may be extended.`);
-      lastResponse.push("eta");
-      setTimeout(arrayRemove, spamTimeout, lastResponse, "eta");
-      return;
-    } else {
-      return;
-    }
   }
-  catch(error) {
-    logIt(error.message, true);
-  }
+  else
+  {
+        // Auto-Reponse Text We're Listening For
+        // ETA on compiles
+        try
+        {
+            if(!lastResponse.contains("eta") && message.content.toLowerCase().includes("eta") && message.content.toLowerCase().includes("compile"))
+            {
+                message.reply(`The ETA for a compile is generally before or at 8PM EST for minor patches. For larger updates this time may be extended.`);
+                lastResponse.push("eta");
+                setTimeout(arrayRemove, spamTimeout, lastResponse, "eta");
+                return;
+            }
+            else
+            {
+              return;
+            }
+        }
+        catch(error)
+        {
+            logIt(error.message, true);
+        }
   }
 })
-
-// Prototype Extensions
-// Does an array contain an item?
-Array.prototype.contains = function(obj) {
-    return this.indexOf(obj) > -1;
-};
-
-// Remove all instances of an item from an array
-Array.prototype.remove = function(item) {
-    for (var i = this.length; i--;) {
-        if (this[i] === item) {
-            this.splice(i, 1);
-        }
-    }
-}
-
-// Functions
-
-// Log certain items or errors
-function logIt(message, isError = false) {
-  if (!isError) {
-    console.log(`[${config.appname}] ` + displayTime() + "> " + message);
-  } else {
-    console.error(`[${config.appname}] ` + displayTime() + "> " + message);
-  }
-}
-
-// Format Timestamps
-function displayTime() {
-    var str = "";
-    var currentTime = new Date()
-    var hours = currentTime.getHours()
-    var minutes = currentTime.getMinutes()
-    var seconds = currentTime.getSeconds()
-    if (minutes < 10) {
-        minutes = "0" + minutes
-    }
-    if (seconds < 10) {
-        seconds = "0" + seconds
-    }
-    str += hours + ":" + minutes + ":" + seconds + " ";
-    if(hours > 11){
-        str += "PM"
-    } else {
-        str += "AM"
-    }
-    return str;
-}
-
-// Remove item from array when callback is needed.
-function arrayRemove(arr, item) {
-    for (var i = arr.length; i--;) {
-        if (arr[i] === item) {
-            arr.splice(i, 1);
-            logIt("Removed " + item + " from " + arr + " array at index [" + i + "]");
-        }
-    }
-}
-
-// Is passed variable a number?
-function isNumeric(n) {
-  return !isNaN(parseFloat(n)) && isFinite(n);
-}
-
-// Is passed variable or array empty
-function isEmpty(obj) {
-    for(var key in obj) {
-        if(obj.hasOwnProperty(key))
-            return false;
-    }
-    return true;
-}
-
-
-// Main Help Menu
-function generalHelp(message) {
-  let hArray = new Array();
-  for (var key in cmdList) {
-    hArray.push(key);
-  }
-  message.author.send(topMenu + "Command List:\n\n " + hArray.toString().replace(/,/g, " ") + "\n\n" + botMenu);
-}
-
-// Help Sub-Menus
-function getHelp(args, message) {
-  try {
-    let arg1 = args[0];
-    let arg2 = args[1];
-    if (!isEmpty(arg1)) {
-      if (!isEmpty(cmdList[arg1])) {
-        let example = cmdList[arg1]['example'];
-        let desc = cmdList[arg1]['desc'];
-        let cmdPerm = (message.member.permissions.has(cmdList[arg1]['perms']) ? "yes" : "no" );
-        if (arg1.toString().toLowerCase() === 'set' && isEmpty(arg2)) {
-          let optionsArray = new Array();
-          for(var key in cmdList['set']['options']) {
-            optionsArray.push(key);
-          }
-          message.author.send(topMenu + "Command: " + arg1 + "\n\nSyntax: " + example + "\n\n" + "Description: " + desc + "\n\nOptions Available: " + optionsArray.toString().replace(/,/g, " ") + "\n\nFor more information on an option '**!help set <option>**'\n\nCan I use this? " + cmdPerm);
-          return;
-        }
-        if (arg1.toString().toLowerCase() === 'set' && !isEmpty(arg2) && !isEmpty(cmdList[arg1]['options'][arg2])) {
-          example = cmdList[arg1]['options'][arg2]['example'];
-          desc = cmdList[arg1]['options'][arg2]['desc'];
-          cmdPerm = (message.member.permissions.has(cmdList[arg1]['options'][arg2]['perms']) ? "yes" : "no" );
-          message.author.send(topMenu + "Command: " + arg1 + " " + arg2 + "\n\nSyntax: " + example + "\n\n" + "Description: " + desc + "\n\nCan I use this? " + cmdPerm);
-          return;
-        } else {
-          message.author.send(topMenu + "Command: " + arg1 + "\n\nSyntax: " + example + "\n\n" + "Description: " + desc + "\n\nCan I use this? " + cmdPerm);
-          return;
-        }
-      } else {
-          message.author.send(`[${config.appname}] Error: No such command. For a list of commands type '**!help**' with no arguments in any channel.`);
-          return;
-      }
-    }
-  }
-  catch(error) {
-    logIt(error.message, true);
-  }
-}
-
-function getUrl( hostName, pathToData, callBack )
-{
-    var data = '';
-
-    var request = http.request( { host: hostName, path: pathToData }, function (res) {
-        res.on('data', function (chunk) {
-            data += chunk;
-        });
-        res.on('end', function () {
-           callBack( data );
-        });
-    });
-
-    request.on('error', function (e) {
-        logIt(e.message);
-    });
-
-    request.end();
-}
 
 // Run the bot
 client.login(config.token);
