@@ -9,10 +9,10 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /home/ubuntu/bot-deploy
+    destination: /opt/DiscordBot/src
 permissions:
-   - object: /home/ubuntu/bot-deploy
-     pattern: "**"
+   - object: /opt/DiscordBot
+     pattern: "*"
      owner: ubuntu 
      group: ubuntu
      mode: 755
