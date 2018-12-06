@@ -14,6 +14,8 @@ const debugMode = false;
 // to letters (something it could never be) when not in use
 const bypassId = config.owner_id;
 
+logIt(`DiscordBot ${config.version} starting up with owner ${config.owner_id}.`);
+
 // Variables for random stuff
 const topMenu = "\nHelp Menu <required> [optional]\n----------------------------------------------------\n";
 const botMenu = "For more info on a command try: '**!help [command]**'";
