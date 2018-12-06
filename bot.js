@@ -16,8 +16,6 @@ const bypassId = config.owner_id;
 
 logIt(`DiscordBot ${config.version} starting up with owner ${config.owner_id}.`);
 
-getUrl( "abc" );
-
 // Variables for random stuff
 const topMenu = "\nHelp Menu <required> [optional]\n----------------------------------------------------\n";
 const botMenu = "For more info on a command try: '**!help [command]**'";
@@ -71,7 +69,7 @@ client.on("message", async message => {
 
     // Display our version. For development purposes
     if(command === "version") {
-      message.channel.send("[MQ2Bot] - Version " + (config.version));
+      message.channel.send(`[${config.appname}] - Version ` + (config.version));
     }
   
     // Check Bot Latency to Discord
@@ -129,9 +127,9 @@ Array.prototype.remove = function(item) {
 // Log certain items or errors
 function logIt(message, isError = false) {
   if (!isError) {
-    console.log("[MQ2Bot] " + displayTime() + "> " + message);
+    console.log(`[${config.appname}] ` + displayTime() + "> " + message);
   } else {
-    console.error("[MQ2Bot] " + displayTime() + "> " + message);
+    console.error(`[${config.appname}] ` + displayTime() + "> " + message);
   }
 }
 
@@ -220,7 +218,7 @@ function getHelp(args, message) {
           return;
         }
       } else {
-          message.author.send(`[MQ2Bot] Error: No such command. For a list of commands type '**!help**' with no arguments in any channel.`);
+          message.author.send(`[${config.appname}] Error: No such command. For a list of commands type '**!help**' with no arguments in any channel.`);
           return;
       }
     }
@@ -230,21 +228,21 @@ function getHelp(args, message) {
   }
 }
 
-function getUrl( url )
+function getUrl( hostName, pathToData, callBack )
 {
-    var request = http.request( { host: 'streamdecker.com', path: '/decks/legenvd' }, function (res) {
-        var data = '';
+    var data = '';
+
+    var request = http.request( { host: hostName, path: pathToData }, function (res) {
         res.on('data', function (chunk) {
             data += chunk;
         });
         res.on('end', function () {
-            console.log(data);
-
+           callBack( data );
         });
     });
 
     request.on('error', function (e) {
-        console.log(e.message);
+        logIt(e.message);
     });
 
     request.end();
