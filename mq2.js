@@ -1,9 +1,18 @@
+// Load config file
+const config = require("./config.json");
+
+// Import HTTP libs
+const http = require('http');
+
+// Load commands file for help system
+const cmdList = require("./commands.json");
+
 // Debug Mode - gives me access by user id to certain commands while on
 const debugMode = false;
 
 // Developer ID - Set this to bypass all permissions checks for this user id. Set it 
 // to letters (something it could never be) when not in use
-const bypassId = '239948288135004162';
+const bypassId = config.owner_id;
 
 // Variables for random stuff
 const topMenu = "\nHelp Menu <required> [optional]\n----------------------------------------------------\n";
@@ -16,12 +25,6 @@ var spamTimeout = 600000;
 // Load base, create a client connection, and load our configuration
 const Discord = require("discord.js");
 const client = new Discord.Client();
-
-// Load config file
-const config = require("./config.json");
-
-// Load commands file for help system
-const cmdList = require("./commands.json");
 
 // Perform on connect/disconnect
 client.on("ready", () => {
@@ -221,6 +224,11 @@ function getHelp(args, message) {
   catch(error) {
     logIt(error.message, true);
   }
+}
+
+function getUrl( url )
+{
+
 }
 
 // Run the bot
