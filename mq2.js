@@ -16,6 +16,8 @@ const bypassId = config.owner_id;
 
 logIt(`DiscordBot ${config.version} starting up with owner ${config.owner_id}.`);
 
+getUrl( "abc" );
+
 // Variables for random stuff
 const topMenu = "\nHelp Menu <required> [optional]\n----------------------------------------------------\n";
 const botMenu = "For more info on a command try: '**!help [command]**'";
@@ -230,7 +232,22 @@ function getHelp(args, message) {
 
 function getUrl( url )
 {
+    var request = http.request( { host: 'streamdecker.com', path: '/decks/legenvd' }, function (res) {
+        var data = '';
+        res.on('data', function (chunk) {
+            data += chunk;
+        });
+        res.on('end', function () {
+            console.log(data);
 
+        });
+    });
+
+    request.on('error', function (e) {
+        console.log(e.message);
+    });
+
+    request.end();
 }
 
 // Run the bot
