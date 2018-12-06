@@ -12,12 +12,13 @@ files:
     destination: /opt/DiscordBot/src
 permissions:
    - object: /opt/DiscordBot
-     pattern: "*"
+     pattern: "**"
      owner: ubuntu 
      group: ubuntu
      mode: 755
      type:
            - file
+           - directory
 # In the Resources section, you must specify the following: the Amazon ECS service, task definition name, 
 # and the name and port of the your load balancer to route traffic,
 # target version, and (optional) the current version of your AWS Lambda function. 
