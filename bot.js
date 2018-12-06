@@ -1,11 +1,11 @@
 // Load config file
-const config = require("./config.json");
+const config = require("./config/config.json");
 
 // Import HTTP libs
 const http = require('http');
 
 // Load commands file for help system
-const cmdList = require("./commands.json");
+const cmdList = require("./config/commands.json");
 
 // Debug Mode - gives me access by user id to certain commands while on
 const debugMode = false;
