@@ -16,10 +16,6 @@ const bypassId = config.owner_id;
 
 logIt(`DiscordBot ${config.version} starting up with owner ${config.owner_id}.`);
 
-// Variables for random stuff
-const topMenu = "\nHelp Menu <required> [optional]\n----------------------------------------------------\n";
-const botMenu = "For more info on a command try: '**!help [command]**'";
-
 // Anti-Spam Functions - Do not let users flood the bot/channel
 var lastResponse = new Array ("Empty");
 var spamTimeout = 600000;
@@ -51,63 +47,18 @@ client.on("message", async message => {
   if(message.channel.name == undefined) return;
 
   // Look for command character. Else ignore command checking.
-  if(message.content.indexOf(config.prefix) == 0) {
+  if(message.content.indexOf(config.prefix) == 0) 
+  {
     let perms = message.member.permissions;
   
     // Separate command and arguments.
     const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
-  
-    // Help Menu
-    if(command === "help")
-    {
-        //call cmdList.help.func();
-    }
-
-    // Display our version. For development purposes
-    if(command === "version") {
-      message.channel.send(`[${config.appname}] - Version ` + (config.version));
-    }
-  
-    // Check Bot Latency to Discord
-    if(command === "ping") {
-      const m = await message.channel.send("Ping?");
-      m.edit(`Pong! Lag: ${m.createdTimestamp - message.createdTimestamp}ms`);
-    }
     
-    // Make the bot talk
-    if(command === "say") {
-      if(!perms.has("MANAGE_MESSAGES") || debugMode &&  message.author.id !== bypassId)
+    if(!perms.has(cmdList[command].perms))
         return message.reply("Sorry, you don't have permissions to use this!");
 
-      const sayMessage = args.join(" ");
-      message.delete().catch(O_o=>{}); 
-      message.channel.send(sayMessage);
-    }
-
-  }
-  else
-  {
-        // Auto-Reponse Text We're Listening For
-        // ETA on compiles
-        try
-        {
-            if(!lastResponse.contains("eta") && message.content.toLowerCase().includes("eta") && message.content.toLowerCase().includes("compile"))
-            {
-                message.reply(`The ETA for a compile is generally before or at 8PM EST for minor patches. For larger updates this time may be extended.`);
-                lastResponse.push("eta");
-                setTimeout(arrayRemove, spamTimeout, lastResponse, "eta");
-                return;
-            }
-            else
-            {
-              return;
-            }
-        }
-        catch(error)
-        {
-            logIt(error.message, true);
-        }
+    cmds[cmdList[command].func]( cmdList[command].args, args, message );
   }
 })
 
@@ -115,9 +66,13 @@ client.on("message", async message => {
 client.login(config.token);
 
 // Command Helpers
-
+var cmds = {};
+cmds.sendMessage = function( cmdArgs, args, message )
+{
+     message.channel.send(eval(cmdArgs));
+}
 // Help Func
-help(args, message)
+cmds.help = function( cmdArgs, args, message )
 {
     if (args.length == 0)
     {
@@ -137,7 +92,7 @@ function generalHelp(message)
   {
     hArray.push(key);
   }
-  message.author.send(topMenu + "Command List:\n\n " + hArray.toString().replace(/,/g, " ") + "\n\n" + botMenu);
+  message.author.send(config.topMenu + "Command List:\n\n " + hArray.toString().replace(/,/g, " ") + "\n\n" + config.botMenu);
 }
 
 // Help Sub-Menus
@@ -160,7 +115,7 @@ function getHelp(args, message)
           {
             optionsArray.push(key);
           }
-          message.author.send(topMenu + "Command: " + arg1 + "\n\nSyntax: " + example + "\n\n" + "Description: " + desc + "\n\nOptions Available: " + optionsArray.toString().replace(/,/g, " ") + "\n\nFor more information on an option '**!help set <option>**'\n\nCan I use this? " + cmdPerm);
+          message.author.send(config.topMenu + "Command: " + arg1 + "\n\nSyntax: " + example + "\n\n" + "Description: " + desc + "\n\nOptions Available: " + optionsArray.toString().replace(/,/g, " ") + "\n\nFor more information on an option '**!help set <option>**'\n\nCan I use this? " + cmdPerm);
           return;
         }
         if (arg1.toString().toLowerCase() === 'set' && !isEmpty(arg2) && !isEmpty(cmdList[arg1]['options'][arg2]))
@@ -168,12 +123,12 @@ function getHelp(args, message)
           example = cmdList[arg1]['options'][arg2]['example'];
           desc = cmdList[arg1]['options'][arg2]['desc'];
           cmdPerm = (message.member.permissions.has(cmdList[arg1]['options'][arg2]['perms']) ? "yes" : "no" );
-          message.author.send(topMenu + "Command: " + arg1 + " " + arg2 + "\n\nSyntax: " + example + "\n\n" + "Description: " + desc + "\n\nCan I use this? " + cmdPerm);
+          message.author.send(config.topMenu + "Command: " + arg1 + " " + arg2 + "\n\nSyntax: " + example + "\n\n" + "Description: " + desc + "\n\nCan I use this? " + cmdPerm);
           return;
         }
         else
         {
-          message.author.send(topMenu + "Command: " + arg1 + "\n\nSyntax: " + example + "\n\n" + "Description: " + desc + "\n\nCan I use this? " + cmdPerm);
+          message.author.send(config.topMenu + "Command: " + arg1 + "\n\nSyntax: " + example + "\n\n" + "Description: " + desc + "\n\nCan I use this? " + cmdPerm);
           return;
         }
       }
