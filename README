@@ -10,3 +10,4 @@ Requirements: Node.js, Discord.js, Nodemon, Basic knowledge of servers, json, ja
 5) sudo npm i nodemon -g
 6) screen -dmS bot nodemon mq2.js
 7) CTRL+A, Then D to leave bot running. CTRL+C to quit
+8) ADD NEW README INFO HERE!
