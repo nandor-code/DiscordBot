@@ -128,8 +128,6 @@ function handleImage( message, url )
                 if (err) {
                     logIt(err); // an error occurred
                 } else {
-                   console.log(data.Labels);
-                   console.log(data.Labels.length);
                    var reply = ""
                    data.Labels.forEach( function( label )
                    {
