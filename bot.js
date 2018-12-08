@@ -1,3 +1,13 @@
+// include image recognition
+const AWS = require('aws-sdk');
+const AWSParameters = require('../config/aws.json');
+AWS.config.update({
+accessKeyId: AWSParameters.AWS.aws_access_key_id,
+secretAccessKey: AWSParameters.AWS.aws_secret_access_key,
+region: AWSParameters.AWS.region
+});
+const rekognition = new AWS.Rekognition();
+
 // include helpers
 const cmdList = require("../config/commands.json");
 
@@ -5,7 +15,9 @@ const cmdList = require("../config/commands.json");
 const config = require("../config/config.json");
 
 // Import HTTP libs
-const http = require('http');
+const http = require('http'),
+https = require('https'),
+Stream = require('stream').Transform;
 
 // Debug Mode - gives me access by user id to certain commands while on
 const debugMode = config.debugMode;
@@ -60,6 +72,10 @@ client.on("message", async message => {
 
     cmds[cmdList[command].func]( cmdList[command].args, args, message );
   }
+  if( message.attachments.array().length > 0 )
+  {
+    handleImage( message, message.attachments.array()[0].url );
+  }
 })
 
 // Run the bot
@@ -83,6 +99,59 @@ cmds.help = function( cmdArgs, args, message )
         getHelp(args, message);
     }
 }
+
+// Image Detection
+function handleImage( message, url )
+{
+    logIt(url);
+    // get image data
+    https.request(url, function(response) {                                        
+        var data = [];
+
+        response.on('data', function(chunk) {                                       
+            data.push(chunk);
+        });                                                                         
+
+        response.on('end', function() {                                             
+            logIt('Image Downloaded!' );
+            var image = Buffer.concat(data);
+
+            var params = {
+                Image: {
+                        Bytes: image
+                },
+                MaxLabels: 10,
+                MinConfidence: 50.0
+            };
+
+            rekognition.detectLabels(params, function(err, data) {
+                if (err) {
+                    logIt(err); // an error occurred
+                } else {
+                   console.log(data.Labels);
+                   console.log(data.Labels.length);
+                   var reply = ""
+                   data.Labels.forEach( function( label )
+                   {
+                       if( reply === "" )
+                       {
+                           reply += "I am ";
+                       }
+                       else
+                       {
+                          reply += " and ";
+                       }
+                       reply += label.Confidence.toFixed(0) + "% sure that is a " + label.Name;
+                   });
+                   reply += "!";
+                   message.channel.send(reply);
+                }
+            });
+        });                                                                         
+    }).end();
+}
+
+//handleImage( "", "https://cdn.discordapp.com/attachments/520388629374435338/521001978860535828/mq2.png" );
 
 // Main Help Menu
 function generalHelp(message)
