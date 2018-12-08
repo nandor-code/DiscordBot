@@ -74,7 +74,16 @@ client.on("message", async message => {
   }
   if( message.attachments.array().length > 0 )
   {
-    handleImage( message, message.attachments.array()[0].url );
+    var url = message.attachments.array()[0].url;
+    var type = url.match(/jpg|jpeg|png/i);
+    if( type )
+    {
+        handleImage( message, message.attachments.array()[0].url );
+    }
+    else
+    {
+        logIt( "Attachement was not valid image type." );
+    }
   }
 })
 
