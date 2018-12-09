@@ -31,6 +31,7 @@ logIt(`DiscordBot ${config.version} starting up with owner ${config.owner_id}.`)
 // Anti-Spam Functions - Do not let users flood the bot/channel
 var lastResponse = new Array ("Empty");
 var spamTimeout = 600000;
+var maxFileSize = 5 * 1024 * 1024; // 5 MB
     
 // Load base, create a client connection, and load our configuration
 const Discord = require("discord.js");
@@ -66,8 +67,8 @@ client.on("message", async message => {
     // Separate command and arguments.
     const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
-    
-    if(!perms.has(cmdList[command].perms))
+
+    if(command in cmdList && perms && !perms.has(cmdList[command].perms))
         return message.reply("Sorry, you don't have permissions to use this!");
 
     cmds[cmdList[command].func]( cmdList[command].args, args, message );
@@ -76,13 +77,13 @@ client.on("message", async message => {
   {
     var url = message.attachments.array()[0].url;
     var type = url.match(/jpg|jpeg|png/i);
-    if( type )
+    if( type && message.attachments.array()[0].filesize < maxFileSize )
     {
         handleImage( message, message.attachments.array()[0].url );
     }
     else
     {
-        logIt( "Attachement was not valid image type." );
+        logIt( "Attachement was not valid image type or too large. [" +  message.attachments.array()[0].filesize + "]" );
     }
   }
 })
