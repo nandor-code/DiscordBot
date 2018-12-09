@@ -2,9 +2,9 @@
 const AWS = require('aws-sdk');
 const AWSParameters = require('../config/aws.json');
 AWS.config.update({
-accessKeyId: AWSParameters.AWS.aws_access_key_id,
-secretAccessKey: AWSParameters.AWS.aws_secret_access_key,
-region: AWSParameters.AWS.region
+    accessKeyId: AWSParameters.AWS.aws_access_key_id,
+    secretAccessKey: AWSParameters.AWS.aws_secret_access_key,
+    region: AWSParameters.AWS.region
 });
 const rekognition = new AWS.Rekognition();
 
@@ -39,73 +39,88 @@ const client = new Discord.Client();
 
 // Perform on connect/disconnect
 client.on("ready", () => {
-  logIt(`Bot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} servers.`); 
-  client.user.setActivity(`EverQuest`);
+    logIt(`Bot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} servers.`);
+    client.user.setActivity(`EverQuest`);
 });
 
 client.on("guildCreate", guild => {
-  logIt(`New server joined: ${guild.name} (id: ${guild.id}). This server has ${guild.memberCount} members!`);
+    logIt(`New server joined: ${guild.name} (id: ${guild.id}). This server has ${guild.memberCount} members!`);
 });
 
 client.on("guildDelete", guild => {
-  logIt(`I have been removed from: ${guild.name} (id: ${guild.id})`);
+    logIt(`I have been removed from: ${guild.name} (id: ${guild.id})`);
 });
 
 // Listen for commands
 client.on("message", async message => {
-  // Ignore ourself
-  if(message.author.bot) return;
+    // Ignore ourself
+    if(message.author.bot) return;
 
-  // Only listen for commands in public channels.
-  if(message.channel.name == undefined) return;
+    // Only listen for commands in public channels.
+    if(message.channel.name == undefined) return;
 
-  // Look for command character. Else ignore command checking.
-  if(message.content.indexOf(config.prefix) == 0) 
-  {
-    let perms = message.member.permissions;
-  
-    // Separate command and arguments.
-    const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
+    // process commands
+    handleMessageCommand( message );
 
-    if(command in cmdList)
-    {
-        if(perms && !perms.has(cmdList[command].perms))
-            return message.reply("Sorry, you don't have permissions to use this!");
+    // process images
+    handleMessageImage( message );
 
-        cmds[cmdList[command].func]( cmdList[command].args, args, message );
-    }
-  }
-
-  var url = ""
-  var matchAry = message.content.match(/\bhttps?:\/\/\S+/gi);
-
-  if( matchAry )
-  {
-    url = matchAry[0];
-  } 
-  else if( message.attachments.array().length > 0 && message.attachments.array()[0].filesize < maxFileSize )
-  {
-    url = message.attachments.array()[0].url;
-  }
- 
-  if( url && url.length > 0 )
-  {
-    logIt( "Got URL: " + url );
-    var type = url.match(/jpg|jpeg|png/i);
-    if( type )
-    {
-        handleImage( message, url );
-    }
-    else
-    {
-        logIt( "Attachement was not valid image type: " + url );
-    }
-  }
 })
 
 // Run the bot
 client.login(config.token);
+
+// Main processing
+function handleMessageCommand( message )
+{
+    // Look for command character. Else ignore command checking.
+    if(message.content.indexOf(config.prefix) == 0)
+    {
+        let perms = message.member.permissions;
+
+        // Separate command and arguments.
+        const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
+        const command = args.shift().toLowerCase();
+
+        if(command in cmdList)
+        {
+            if(perms && !perms.has(cmdList[command].perms))
+                return message.reply("Sorry, you don't have permissions to use this!");
+
+            cmds[cmdList[command].func]( cmdList[command].args, args, message );
+        }
+    }
+}
+
+function handleMessageImage( message )
+{
+    var url = ""
+    var matchAry = message.content.match(/\bhttps?:\/\/\S+/gi);
+
+    if( matchAry )
+    {
+        url = matchAry[0];
+    }
+    else if( message.attachments.array().length > 0 && message.attachments.array()[0].filesize < maxFileSize )
+    {
+        url = message.attachments.array()[0].url;
+    }
+
+    if( url && url.length > 0 )
+    {
+        logIt( "Got URL: " + url );
+        var type = url.match(/jpg|jpeg|png/i);
+
+        if( type )
+        {
+            handleImage( message, url );
+        }
+        else
+        {
+            logIt( "Attachement was not valid image type: " + url );
+        }
+    }
+}
 
 // Command Helpers
 var cmds = {};
@@ -186,62 +201,63 @@ function handleImage( message, url )
 // Main Help Menu
 function generalHelp(message)
 {
-  let hArray = new Array();
-  for (var key in cmdList)
-  {
-    hArray.push(key);
-  }
-  message.author.send(config.topMenu + "Command List:\n\n " + hArray.toString().replace(/,/g, " ") + "\n\n" + config.botMenu);
+    let hArray = new Array();
+    for (var key in cmdList)
+    {
+        hArray.push(key);
+    }
+    message.author.send(config.topMenu + "Command List:\n\n " + hArray.toString().replace(/,/g, " ") + "\n\n" + config.botMenu);
 }
 
 // Help Sub-Menus
 function getHelp(args, message)
 {
-  try {
-    let arg1 = args[0];
-    let arg2 = args[1];
-    if (!isEmpty(arg1))
-    {
-      if (!isEmpty(cmdList[arg1]))
-      {
-        let example = cmdList[arg1]['example'];
-        let desc = cmdList[arg1]['desc'];
-        let cmdPerm = (message.member.permissions.has(cmdList[arg1]['perms']) ? "yes" : "no" );
-        if (arg1.toString().toLowerCase() === 'set' && isEmpty(arg2))
+    try {
+        let arg1 = args[0];
+        let arg2 = args[1];
+        if (!isEmpty(arg1))
         {
-          let optionsArray = new Array();
-          for(var key in cmdList['set']['options'])
-          {
-            optionsArray.push(key);
-          }
-          message.author.send(config.topMenu + "Command: " + arg1 + "\n\nSyntax: " + example + "\n\n" + "Description: " + desc + "\n\nOptions Available: " + optionsArray.toString().replace(/,/g, " ") + "\n\nFor more information on an option '**!help set <option>**'\n\nCan I use this? " + cmdPerm);
-          return;
+            if (!isEmpty(cmdList[arg1]))
+            {
+                let example = cmdList[arg1]['example'];
+                let desc = cmdList[arg1]['desc'];
+                let cmdPerm = (message.member.permissions.has(cmdList[arg1]['perms']) ? "yes" : "no" );
+                if (arg1.toString().toLowerCase() === 'set' && isEmpty(arg2))
+                {
+                    let optionsArray = new Array();
+                    for(var key in cmdList['set']['options'])
+                    {
+                        optionsArray.push(key);
+                    }
+
+                    message.author.send(config.topMenu + "Command: " + arg1 + "\n\nSyntax: " + example + "\n\n" + "Description: " + desc + "\n\nOptions Available: " + optionsArray.toString().replace(/,/g, " ") + "\n\nFor more information on an option '**!help set <option>**'\n\nCan I use this? " + cmdPerm);
+                    return;
+                }
+                if (arg1.toString().toLowerCase() === 'set' && !isEmpty(arg2) && !isEmpty(cmdList[arg1]['options'][arg2]))
+                {
+                    example = cmdList[arg1]['options'][arg2]['example'];
+                    desc = cmdList[arg1]['options'][arg2]['desc'];
+                    cmdPerm = (message.member.permissions.has(cmdList[arg1]['options'][arg2]['perms']) ? "yes" : "no" );
+                    message.author.send(config.topMenu + "Command: " + arg1 + " " + arg2 + "\n\nSyntax: " + example + "\n\n" + "Description: " + desc + "\n\nCan I use this? " + cmdPerm);
+                    return;
+                }
+                else
+                {
+                    message.author.send(config.topMenu + "Command: " + arg1 + "\n\nSyntax: " + example + "\n\n" + "Description: " + desc + "\n\nCan I use this? " + cmdPerm);
+                    return;
+                }
+            }
+            else
+            {
+                message.author.send(`[${config.appname}] Error: No such command. For a list of commands type '**!help**' with no arguments in any channel.`);
+                return;
+            }
         }
-        if (arg1.toString().toLowerCase() === 'set' && !isEmpty(arg2) && !isEmpty(cmdList[arg1]['options'][arg2]))
-        {
-          example = cmdList[arg1]['options'][arg2]['example'];
-          desc = cmdList[arg1]['options'][arg2]['desc'];
-          cmdPerm = (message.member.permissions.has(cmdList[arg1]['options'][arg2]['perms']) ? "yes" : "no" );
-          message.author.send(config.topMenu + "Command: " + arg1 + " " + arg2 + "\n\nSyntax: " + example + "\n\n" + "Description: " + desc + "\n\nCan I use this? " + cmdPerm);
-          return;
-        }
-        else
-        {
-          message.author.send(config.topMenu + "Command: " + arg1 + "\n\nSyntax: " + example + "\n\n" + "Description: " + desc + "\n\nCan I use this? " + cmdPerm);
-          return;
-        }
-      }
-      else
-      {
-          message.author.send(`[${config.appname}] Error: No such command. For a list of commands type '**!help**' with no arguments in any channel.`);
-          return;
-      }
     }
-  }
-  catch(error)
-  {
-    logIt(error.message, true);
-  }
+    catch(error)
+    {
+        logIt(error.message, true);
+    }
 }
 
 // Generic Helpers
@@ -249,16 +265,20 @@ function getUrl( hostName, pathToData, callBack )
 {
     var data = '';
 
-    var request = http.request( { host: hostName, path: pathToData }, function (res) {
-        res.on('data', function (chunk) {
+    var request = http.request( { host: hostName, path: pathToData }, function (res)
+    {
+        res.on('data', function (chunk)
+        {
             data += chunk;
         });
-        res.on('end', function () {
+        res.on('end', function ()
+        {
            callBack( data );
         });
     });
 
-    request.on('error', function (e) {
+    request.on('error', function (e)
+    {
         logIt(e.message);
     });
 
@@ -268,14 +288,14 @@ function getUrl( hostName, pathToData, callBack )
 // Log certain items or errors
 function logIt(message, isError = false)
 {
-  if (!isError)
-  {
-    console.log(`[${config.appname}] ` + displayTime() + "> " + message);
-  }
-  else
-  {
-    console.error(`[${config.appname}] ` + displayTime() + "> " + message);
-  }
+    if (!isError)
+    {
+        console.log(`[${config.appname}] ` + displayTime() + "> " + message);
+    }
+    else
+    {
+        console.error(`[${config.appname}] ` + displayTime() + "> " + message);
+    }
 }
 
 // Format Timestamps
