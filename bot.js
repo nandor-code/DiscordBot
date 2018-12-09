@@ -1,11 +1,13 @@
 // include image recognition
 const AWS = require('aws-sdk');
+
 const AWSParameters = require('../config/aws.json');
 AWS.config.update({
     accessKeyId: AWSParameters.AWS.aws_access_key_id,
     secretAccessKey: AWSParameters.AWS.aws_secret_access_key,
     region: AWSParameters.AWS.region
 });
+
 const rekognition = new AWS.Rekognition();
 
 // include helpers
