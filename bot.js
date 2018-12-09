@@ -17,9 +17,8 @@ const cmdList = require("../config/commands.json");
 const config = require("../config/config.json");
 
 // Import HTTP libs
-const http = require('http'),
-https = require('https'),
-Stream = require('stream').Transform;
+const http   = require('http'),
+      https  = require('https');
 
 // Debug Mode - gives me access by user id to certain commands while on
 const debugMode = config.debugMode;
