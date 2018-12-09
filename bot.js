@@ -76,17 +76,30 @@ client.on("message", async message => {
         cmds[cmdList[command].func]( cmdList[command].args, args, message );
     }
   }
-  if( message.attachments.array().length > 0 )
+
+  var url = ""
+  var matchAry = message.content.match(/\bhttps?:\/\/\S+/gi);
+
+  if( matchAry )
   {
-    var url = message.attachments.array()[0].url;
+    url = matchAry[0];
+  } 
+  else if( message.attachments.array().length > 0 && message.attachments.array()[0].filesize < maxFileSize )
+  {
+    url = message.attachments.array()[0].url;
+  }
+ 
+  if( url && url.length > 0 )
+  {
+    logIt( "Got URL: " + url );
     var type = url.match(/jpg|jpeg|png/i);
-    if( type && message.attachments.array()[0].filesize < maxFileSize )
+    if( type )
     {
-        handleImage( message, message.attachments.array()[0].url );
+        handleImage( message, url );
     }
     else
     {
-        logIt( "Attachement was not valid image type or too large. [" +  message.attachments.array()[0].filesize + "]" );
+        logIt( "Attachement was not valid image type: " + url );
     }
   }
 })
@@ -117,8 +130,14 @@ cmds.help = function( cmdArgs, args, message )
 function handleImage( message, url )
 {
     logIt(url);
+    var httpHandler = http;
+
+    if( url.match(/https/i) )
+    {
+        httpHandler = https;    
+    }
     // get image data
-    https.request(url, function(response) {                                        
+    httpHandler.request(url, function(response) {                                        
         var data = [];
 
         response.on('data', function(chunk) {                                       
