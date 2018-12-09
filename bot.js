@@ -1,3 +1,7 @@
+// import version
+const version = require('./version.json');
+const ver = version.version.substring(1,8);
+
 // include image recognition
 const AWS = require('aws-sdk');
 
@@ -27,7 +31,7 @@ const debugMode = config.debugMode;
 // to letters (something it could never be) when not in use
 const bypassId = config.owner_id;
 
-logIt(`DiscordBot ${config.version} starting up with owner ${config.owner_id}.`);
+logIt(`DiscordBot ${config.version} (${ver}) starting up with owner ${config.owner_id}.`);
 
 // Anti-Spam Functions - Do not let users flood the bot/channel
 var lastResponse = new Array ("Empty");
@@ -41,7 +45,7 @@ const client = new Discord.Client();
 // Perform on connect/disconnect
 client.on("ready", () => {
     logIt(`Bot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} servers.`);
-    client.user.setActivity(`EverQuest`);
+    client.user.setActivity(`EverQuest (` + ver + `)`);
 });
 
 client.on("guildCreate", guild => {
