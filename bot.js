@@ -68,10 +68,13 @@ client.on("message", async message => {
     const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
-    if(command in cmdList && perms && !perms.has(cmdList[command].perms))
-        return message.reply("Sorry, you don't have permissions to use this!");
+    if(command in cmdList)
+    {
+        if(perms && !perms.has(cmdList[command].perms))
+            return message.reply("Sorry, you don't have permissions to use this!");
 
-    cmds[cmdList[command].func]( cmdList[command].args, args, message );
+        cmds[cmdList[command].func]( cmdList[command].args, args, message );
+    }
   }
   if( message.attachments.array().length > 0 )
   {
