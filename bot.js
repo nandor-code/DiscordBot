@@ -1,5 +1,5 @@
 // import version
-const ver = require('./version.json').version.substring(1,8);
+const ver = require('./version.json').version.substring(0,7);
 
 // include image recognition
 const AWS = require('aws-sdk');
